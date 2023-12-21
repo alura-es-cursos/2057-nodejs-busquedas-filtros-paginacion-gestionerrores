@@ -4,8 +4,11 @@ import { autorModel, libroModel } from '../models/index.js';
 class libroController {
     async listaLibros(req, res, next) {
         try {
-            const listaLibros = await libroModel.find({});
-            res.status(200).json(listaLibros);
+            const listaLibros = libroModel.find();
+
+            req.resultado = listaLibros;
+
+            next();
         } catch (error) {
             next(error);
         }
@@ -76,10 +79,11 @@ class libroController {
 
     async listaLibrosParametros(req, res, next) {
         try {
+        
+            const listaLibros = libroModel.find(procesaParametros(req.query));
             
-            
-            const listaLibros = await libroModel.find(procesaParametros(req.query));
-            res.status(200).json(listaLibros);
+            req.resultado = listaLibros;
+            next();
         } catch (error) {
             next(error);
         }
