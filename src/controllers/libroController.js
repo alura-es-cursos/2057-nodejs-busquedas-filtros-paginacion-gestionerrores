@@ -1,6 +1,5 @@
 import Error404 from '../errors/Error404.js';
-import { autorModel } from '../models/autor.js';
-import libroModel from '../models/libros.js';
+import { autorModel, libroModel } from '../models/index.js';
 
 class libroController {
     async listaLibros(req, res, next) {

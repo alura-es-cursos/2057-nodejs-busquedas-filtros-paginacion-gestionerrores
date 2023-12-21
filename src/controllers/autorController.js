@@ -1,5 +1,5 @@
 import Error404 from '../errors/Error404.js';
-import { autorModel } from '../models/autor.js';
+import { autorModel } from '../models/index.js';
 
 class autorController {
     async listaAutores(req, res, next) {
