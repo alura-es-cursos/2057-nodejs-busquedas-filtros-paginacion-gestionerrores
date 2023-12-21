@@ -1,62 +1,71 @@
+import Error404 from '../errors/Error404.js';
 import { autorModel } from '../models/autor.js';
 
 class autorController {
-    async listaAutores(req, res) {
-        const listaAutores = await autorModel.find({});
-        res.status(200).json(listaAutores);
+    async listaAutores(req, res, next) {
+        try {
+            const listaAutores = await autorModel.find({});
+            res.status(200).json(listaAutores);
+        } catch (error) {
+            next(error);
+        }
+        
     }
 
-    async listaAutorPorId(req, res) {
+    async listaAutorPorId(req, res, next) {
         const id = req.params.id;
         try {
             const autor = await autorModel.findById(id);
             if (autor != null) {
                 res.status(200).json(autor);
             } else {
-                res.status(404).send({message: 'Autor no encontrado'});
+                next(new Error404('Autor no localizado'));
             }
             
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible consultar el autor con id ${id}`,
-            });
+            next(error);
         }
     }
 
-    async creaAutor(req, res) {
+    async creaAutor(req, res, next) {
         try {
             const nuevoAutor = await autorModel.create(req.body);
             res.status(201).json({ result: true, nuevoAutor: nuevoAutor });
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible hacer el registro del autor`,
-            });
+            next(error);
         }
     }
 
-    async actualizaAutorPorId(req, res) {
+    async actualizaAutorPorId(req, res, next) {
         const id = req.params.id;
         try {
-            await autorModel.findByIdAndUpdate(id, req.body);
-            res.status(200).json({ result: true, mensaje: 'Autor actualizado' });
+            const autorResultado = await autorModel.findByIdAndUpdate(id, req.body);
+            if (autorResultado != null) {
+                res.status(200).json({ result: true, mensaje: 'Autor actualizado' });
+            } else {
+                next(new Error404('Autor no localizado'));
+            }
+            
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible actualizar el autor con id ${id}`,
-            });
+            next(error);
         }
     }
 
-    async eliminaAutorPorId(req, res) {
+    async eliminaAutorPorId(req, res, next) {
         const id = req.params.id;
         try {
-            await autorModel.findByIdAndDelete(id);
-            res
-                .status(200)
-                .json({ result: true, mensaje: 'Autor borrado con éxito' });
+            const autorResultado = await autorModel.findByIdAndDelete(id);
+
+            if (autorResultado != null) {
+                res
+                    .status(200)
+                    .json({ result: true, mensaje: 'Autor borrado con éxito' });
+            } else {
+                next(new Error404('Autor no localizado'));
+            }
+            
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible eliminar el autor con id ${id}`,
-            });
+            next(error);
         }
     }
 }

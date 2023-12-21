@@ -1,20 +1,18 @@
-import mongoose from 'mongoose';
+import Error404 from '../errors/Error404.js';
 import { autorModel } from '../models/autor.js';
 import libroModel from '../models/libros.js';
 
 class libroController {
-    async listaLibros(req, res) {
+    async listaLibros(req, res, next) {
         try {
             const listaLibros = await libroModel.find({});
             res.status(200).json(listaLibros);
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible consultar los libros`,
-            });
+            next(error);
         }
     }
 
-    async listaLibroPorId(req, res) {
+    async listaLibroPorId(req, res, next) {
         const id = req.params.id;
         try {
             const libro = await libroModel.findById(id);
@@ -22,23 +20,14 @@ class libroController {
             if (libro != null) {
                 res.status(200).json(libro);
             } else {
-                res.status(404).send({message: 'Libro no encontrado'});
+                next(new Error404('Libro no localizado'));
             }
         } catch (error) {
-            if (error instanceof mongoose.Error.CastError) {
-                res.status(500).json({
-                    error: `Error: Valor del ID del documento no corresponde - ID:${id}`,
-                });
-            } else {
-                res.status(500).json({
-                    error: `Error: ${error.message} - No fue posible consultar el libro con id ${id}`,
-                });
-            }
-            
+            next(error);
         }
     }
 
-    async creaLibro(req, res) {
+    async creaLibro(req, res, next) {
         try {
             const dataLibro = req.body;
             const autorLibro = await autorModel.findById(dataLibro.autor);
@@ -46,48 +35,54 @@ class libroController {
             const nuevoLibro = await libroModel.create(libroCompleto);
             res.status(201).json({ result: true, nuevoLibro: nuevoLibro });
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible hacer el registro del libro`,
-            });
+            next(error);
         }
     }
 
-    async actualizaLibroPorId(req, res) {
+    async actualizaLibroPorId(req, res, next) {
         const id = req.params.id;
         try {
-            await libroModel.findByIdAndUpdate(id, req.body);
-            res.status(200).json({ result: true, mensaje: 'Libro actualizado' });
+            const libro = await libroModel.findByIdAndUpdate(id, req.body);
+
+            if (libro != null) {
+                res.status(200).json({ result: true, mensaje: 'Libro actualizado' });
+            }
+            else {
+                next(new Error404('Libro no localizado'));
+            }
+            
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible actualizar el libro con id ${id}`,
-            });
+            next(error);
         }
     }
 
-    async eliminaLibroPorId(req, res) {
+    async eliminaLibroPorId(req, res, next) {
         const id = req.params.id;
         try {
-            await libroModel.findByIdAndDelete(id);
-            res
-                .status(200)
-                .json({ result: true, mensaje: 'Libro borrado con éxito' });
+            const libro = await libroModel.findByIdAndDelete(id);
+
+            if (libro != null) {
+                res
+                    .status(200)
+                    .json({ result: true, mensaje: 'Libro borrado con éxito' });
+            }
+            else {
+                next(new Error404('Libro no localizado'));
+            }
+            
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible eliminar el libro con id ${id}`,
-            });
+            next(error);
         }
     }
 
-    async listaLibrosParametros(req, res) {
+    async listaLibrosParametros(req, res, next) {
         try {
             const { editorial } = req.query;
             console.log(editorial);
             const listaLibros = await libroModel.find({ editorial });
             res.status(200).json(listaLibros);
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible consultar los libros por parámetro`,
-            });
+            next(error);
         }
     }
 }
