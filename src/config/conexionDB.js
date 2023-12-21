@@ -1,10 +1,8 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 async function conectaBaseDeDatos() {
-  mongoose.connect(
-    "mongodb+srv://alura:formacion123@cluster0.79nbkgj.mongodb.net/libreria_alura?retryWrites=true&w=majority"
-  );
-  return mongoose.connection;
+    mongoose.connect(process.env.DB_CONNECT);
+    return mongoose.connection;
 }
 
 export default conectaBaseDeDatos;

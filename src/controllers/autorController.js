@@ -1,4 +1,4 @@
-import { autorModel } from "../models/autor.js";
+import { autorModel } from '../models/autor.js';
 
 class autorController {
     async listaAutores(req, res) {
@@ -10,7 +10,12 @@ class autorController {
         const id = req.params.id;
         try {
             const autor = await autorModel.findById(id);
-            res.status(200).json(autor);
+            if (autor != null) {
+                res.status(200).json(autor);
+            } else {
+                res.status(404).send({message: 'Autor no encontrado'});
+            }
+            
         } catch (error) {
             res.status(500).json({
                 error: `Error: ${error.message} - No fue posible consultar el autor con id ${id}`,
@@ -33,7 +38,7 @@ class autorController {
         const id = req.params.id;
         try {
             await autorModel.findByIdAndUpdate(id, req.body);
-            res.status(200).json({ result: true, mensaje: "Autor actualizado" });
+            res.status(200).json({ result: true, mensaje: 'Autor actualizado' });
         } catch (error) {
             res.status(500).json({
                 error: `Error: ${error.message} - No fue posible actualizar el autor con id ${id}`,
@@ -47,7 +52,7 @@ class autorController {
             await autorModel.findByIdAndDelete(id);
             res
                 .status(200)
-                .json({ result: true, mensaje: "Autor borrado con éxito" });
+                .json({ result: true, mensaje: 'Autor borrado con éxito' });
         } catch (error) {
             res.status(500).json({
                 error: `Error: ${error.message} - No fue posible eliminar el autor con id ${id}`,

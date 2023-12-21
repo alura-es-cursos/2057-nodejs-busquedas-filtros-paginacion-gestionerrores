@@ -1,5 +1,6 @@
-import { autorModel } from "../models/autor.js";
-import libroModel from "../models/libros.js";
+import mongoose from 'mongoose';
+import { autorModel } from '../models/autor.js';
+import libroModel from '../models/libros.js';
 
 class libroController {
     async listaLibros(req, res) {
@@ -17,11 +18,23 @@ class libroController {
         const id = req.params.id;
         try {
             const libro = await libroModel.findById(id);
-            res.status(200).json(libro);
+
+            if (libro != null) {
+                res.status(200).json(libro);
+            } else {
+                res.status(404).send({message: 'Libro no encontrado'});
+            }
         } catch (error) {
-            res.status(500).json({
-                error: `Error: ${error.message} - No fue posible consultar el libro con id ${id}`,
-            });
+            if (error instanceof mongoose.Error.CastError) {
+                res.status(500).json({
+                    error: `Error: Valor del ID del documento no corresponde - ID:${id}`,
+                });
+            } else {
+                res.status(500).json({
+                    error: `Error: ${error.message} - No fue posible consultar el libro con id ${id}`,
+                });
+            }
+            
         }
     }
 
@@ -43,7 +56,7 @@ class libroController {
         const id = req.params.id;
         try {
             await libroModel.findByIdAndUpdate(id, req.body);
-            res.status(200).json({ result: true, mensaje: "Libro actualizado" });
+            res.status(200).json({ result: true, mensaje: 'Libro actualizado' });
         } catch (error) {
             res.status(500).json({
                 error: `Error: ${error.message} - No fue posible actualizar el libro con id ${id}`,
@@ -57,7 +70,7 @@ class libroController {
             await libroModel.findByIdAndDelete(id);
             res
                 .status(200)
-                .json({ result: true, mensaje: "Libro borrado con éxito" });
+                .json({ result: true, mensaje: 'Libro borrado con éxito' });
         } catch (error) {
             res.status(500).json({
                 error: `Error: ${error.message} - No fue posible eliminar el libro con id ${id}`,
