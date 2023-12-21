@@ -76,9 +76,9 @@ class libroController {
 
     async listaLibrosParametros(req, res, next) {
         try {
-            const { editorial } = req.query;
-            console.log(editorial);
-            const listaLibros = await libroModel.find({ editorial });
+            
+            
+            const listaLibros = await libroModel.find(procesaParametros(req.query));
             res.status(200).json(listaLibros);
         } catch (error) {
             next(error);
@@ -86,4 +86,35 @@ class libroController {
     }
 }
 
+function procesaParametros(query) {
+    const { editorial, titulo, minPag, maxPag, nombreAutor, nacionalidadAutor } = query;
+
+    const criterios = {};
+
+    if (editorial) {
+        criterios.editorial = new RegExp(editorial,'i');
+    }
+    if (titulo) {
+        criterios.titulo = { $regex: titulo, $options: 'i'};
+    }
+
+    if (minPag || maxPag ) {
+        criterios.paginas = {};
+    }
+    if (minPag) {
+        criterios.paginas.$gte = minPag;
+    }
+    if (maxPag) {
+        criterios.paginas.$lte = maxPag;
+    }
+    if (nombreAutor) {
+        criterios['autor.nombre'] = new RegExp(nombreAutor,'i');
+    }
+    if (nacionalidadAutor) {
+        criterios['autor.nacionalidad'] = new RegExp(nacionalidadAutor,'i');
+    }
+    
+
+    return criterios;
+}
 export default new libroController();
